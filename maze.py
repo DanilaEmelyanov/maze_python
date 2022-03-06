@@ -20,7 +20,7 @@ class Player(sprite.Sprite):
         self.rect.y = player_y
     def reset(self):
         window.blit(self.image, (self.rect.x, self.rect.y))
-    def update(self):
+    def update_wasd(self):
         keys_pressed = key.get_pressed()
         if keys_pressed[K_w] and self.rect.y > 50:
             self.rect.y -= self.speed
@@ -29,6 +29,16 @@ class Player(sprite.Sprite):
         if keys_pressed[K_a] and self.rect.x > 5:
             self.rect.x -= self.speed
         if keys_pressed[K_d] and self.rect.x < 640:
+            self.rect.x += self.speed
+    def update_arrows(self):
+        keys_pressed = key.get_pressed()
+        if keys_pressed[K_UP] and self.rect.y > 50:
+            self.rect.y -= self.speed
+        if keys_pressed[K_DOWN] and self.rect.y < 370:
+            self.rect.y += self.speed
+        if keys_pressed[K_LEFT] and self.rect.x > 5:
+            self.rect.x -= self.speed
+        if keys_pressed[K_RIGHT] and self.rect.x < 640:
             self.rect.x += self.speed 
 class Enemy(sprite.Sprite):
     def __init__(self, player_image, player_x, player_y, player_speed, direction):
@@ -70,28 +80,31 @@ class Wall(sprite.Sprite):
         self.rect.y = wall_y
     def draw_wall(self):
         window.blit(self.image, (self.rect.x, self.rect.y))    
-        
+
+
 #создай окно игры
 window = display.set_mode((700, 500))
 display.set_caption("Maze")
 clock = time.Clock()
 FPS = 60
+
 background = transform.scale(image.load("background.jpg"), (700, 500))
 treasure = GameSprite('treasure.png', 500, 370,1)
 player = Player('hero.png', 5, 420, 4)
 enemy = Enemy('cyborg.png', 620 , 280, 2,'left')
-wall1 = Wall(94, 164, 0, 10, 50,650,5)
-wall2 = Wall(94, 164, 0, 10, 50,5,320)
-wall3 = Wall(94, 164, 0, 150, 305,5,330)
-wall4 = Wall(94, 164, 0, 125, 210,250,5)
-wall5 = Wall(94, 164, 0, 300, 140,5,190)
-wall6 = Wall(94, 164, 0, 125, 300,250,5)
-wall7 = Wall(94, 164, 0, 300, 160,125,5)
-wall8 = Wall(94, 164, 0, 400, 160,5,125)
-wall9 = Wall(94, 164, 0, 320, 265,125,5)
-wall10 = Wall(94, 164, 0, 425, 250,5,140)
+wall1 = Wall(0, 102, 0, 10, 50,650,5)
+wall2 = Wall(0, 102, 0, 10, 50,5,320)
+wall3 = Wall(0, 102, 0, 150, 305,5,330)
+wall4 = Wall(0, 102, 0, 125, 210,250,5)
+wall5 = Wall(0, 102, 0, 300, 140,5,190)
+wall6 = Wall(0, 102, 0, 125, 300,250,5)
+wall7 = Wall(0, 102, 0, 300, 160,125,5)
+wall8 = Wall(0, 102, 0, 400, 160,5,125)
+wall9 = Wall(0, 102, 0, 320, 265,125,5)
+wall10 = Wall(0, 102, 0, 425, 250,5,140)
 font.init()
 font = font.SysFont('Arial',70)
+#font2 = font.SysFont('Arial',35)
 win = font.render('YOU WIN', True, (255, 215, 0))
 mixer.init()
 kick = mixer.Sound('kick.ogg')
@@ -100,42 +113,55 @@ money = mixer.Sound('money.ogg')
 #mixer.music.play()
 game = True
 finish = False
+
+scene = 'menu'
 while game:
     
     for e in event.get():
         if e.type == QUIT:
             game = False
 
-    
-    if finish != True:
+    if scene == 'menu':
         window.blit(background, (0,0))
-        player.reset()
-        enemy.reset()
-        treasure.reset()
-        wall1.draw_wall()
-        wall2.draw_wall()
-        wall3.draw_wall()
-        wall4.draw_wall()
-        wall5.draw_wall()
-        wall6.draw_wall()
-        wall7.draw_wall()
-        wall8.draw_wall()
-        wall9.draw_wall()
-        wall10.draw_wall()
-        player.update()
-        enemy.update()
-        if sprite.collide_rect(player, treasure):
-            finish = True
-            money.play()
-            print('Player is collide ')
-            win = font.render('YOU WIN', True, (255, 215, 0))
-            window.blit(win, (250,200))
+        title = font.render('MAZE GAME', True, (255,0,0))
+        start_game = font.render('start', True, (255, 0 ,0))
+        window.blit(title, (160,0))
+        window.blit(start_game ,(270,150))
+    if scene == 'game':
+        if finish != True:
+            window.blit(background, (0,0))
+            player.reset()
+            enemy.reset()
+            treasure.reset()
+            wall1.draw_wall()
+            wall2.draw_wall()
+            wall3.draw_wall()
+            wall4.draw_wall()
+            wall5.draw_wall()
+            wall6.draw_wall()
+            wall7.draw_wall()
+            wall8.draw_wall()
+            wall9.draw_wall()
+            wall10.draw_wall()
+            player.update_wasd()
+            player.update_arrows()
+            enemy.update()
+
+            if sprite.collide_rect(player, treasure):
+                finish = True
+                money.play()
+                print('Player is collide ')
+                win = font.render('YOU WIN', True, (255, 215, 0))
+                window.blit(win, (250,200))
             
-        if sprite.collide_rect(player, enemy) or sprite.collide_rect(player, wall1) or sprite.collide_rect(player, wall2) or sprite.collide_rect(player, wall3) or sprite.collide_rect(player, wall4) or sprite.collide_rect(player, wall5) or sprite.collide_rect(player, wall6) or sprite.collide_rect(player, wall7) or sprite.collide_rect(player, wall8) or sprite.collide_rect(player, wall9) or sprite.collide_rect(player, wall10):
-            finish = True
-            kick.play()
-            lose = font.render('YOU LOSE', True, (255,0,0))
-            window.blit(lose, (250,200))
-           
+            if sprite.collide_rect(player, enemy) or sprite.collide_rect(player, wall1) or sprite.collide_rect(player, wall2) or sprite.collide_rect(player, wall3) or sprite.collide_rect(player, wall4) or sprite.collide_rect(player, wall5) or sprite.collide_rect(player, wall6) or sprite.collide_rect(player, wall7) or sprite.collide_rect(player, wall8) or sprite.collide_rect(player, wall9) or sprite.collide_rect(player, wall10):
+                finish = True
+                kick.play()
+                lose = font.render('YOU LOSE', True, (255,0,0))
+                window.blit(lose, (250,200))
+                
+    scene = 'game'
+    
+    
     display.update()
     clock.tick(FPS)
